@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -21,16 +21,34 @@ import {
 } from "@/components/ui/select";
 import { getGame, deleteGame, updateGame } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export default function GameDetails() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const id = parseInt(window.location.pathname.split("/games/")[1]);
+  const [review, setReview] = useState("");
+  const debouncedReview = useDebounce(review, 500);
 
   const { data: game, isLoading } = useQuery({
     queryKey: [`/api/games/${id}`],
     queryFn: () => getGame(id),
   });
+
+  useEffect(() => {
+    if (game?.review) {
+      setReview(game.review);
+    }
+  }, [game?.review]);
+
+  useEffect(() => {
+    if (debouncedReview !== game?.review) {
+      updateMutation.mutate({
+        id,
+        data: { review: debouncedReview },
+      });
+    }
+  }, [debouncedReview]);
 
   const deleteMutation = useMutation({
     mutationFn: deleteGame,
@@ -226,13 +244,8 @@ export default function GameDetails() {
             </CardHeader>
             <CardContent>
               <textarea
-                value={game.review || ""}
-                onChange={(e) =>
-                  updateMutation.mutate({
-                    id,
-                    data: { review: e.target.value },
-                  })
-                }
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
                 placeholder="Write your review here..."
                 className="w-full min-h-[200px] p-4 rounded-md border bg-background resize-none"
               />

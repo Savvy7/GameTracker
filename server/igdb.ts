@@ -50,7 +50,9 @@ export async function searchIGDBGames(query: string) {
       "Content-Type": "application/json",
     },
     body: `search "${query}";
-          fields name,cover.url,first_release_date,platforms.name,genres.name,rating,summary;
+          fields name,cover.url,first_release_date,platforms.name,genres.name,rating,summary,
+          involved_companies.company.name,involved_companies.publisher,involved_companies.developer,
+          game_modes.name,total_rating,total_rating_count,status,category;
           limit 10;
           where version_parent = null;`,
   });
@@ -71,5 +73,11 @@ export async function searchIGDBGames(query: string) {
     genres: game.genres?.map((g: any) => g.name) || [],
     rating: Math.round(game.rating) || null,
     summary: game.summary || null,
+    developer: game.involved_companies?.find((c: any) => c.developer)?.company?.name || null,
+    publisher: game.involved_companies?.find((c: any) => c.publisher)?.company?.name || null,
+    tags: game.game_modes?.map((m: any) => m.name) || [],
+    // Note: Install size and time to complete are not available in IGDB API
+    installSize: null,
+    timeToComplete: null,
   }));
 }
