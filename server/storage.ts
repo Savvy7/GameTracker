@@ -1,4 +1,6 @@
 import { games, type Game, type InsertGame } from "@shared/schema";
+import { db } from "./db";
+import { eq, ilike } from "drizzle-orm";
 
 export interface IStorage {
   getGames(): Promise<Game[]>;
@@ -7,38 +9,30 @@ export interface IStorage {
   searchGames(query: string): Promise<Game[]>;
 }
 
-export class MemStorage implements IStorage {
-  private games: Map<number, Game>;
-  private currentId: number;
-
-  constructor() {
-    this.games = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getGames(): Promise<Game[]> {
-    return Array.from(this.games.values());
+    return await db.select().from(games);
   }
 
   async getGame(id: number): Promise<Game | undefined> {
-    return this.games.get(id);
+    const [game] = await db.select().from(games).where(eq(games.id, id));
+    return game;
   }
 
   async createGame(insertGame: InsertGame): Promise<Game> {
-    const id = this.currentId++;
-    const game: Game = { id, ...insertGame };
-    this.games.set(id, game);
+    const [game] = await db.insert(games).values(insertGame).returning();
     return game;
   }
 
   async searchGames(query: string): Promise<Game[]> {
-    const lowercaseQuery = query.toLowerCase();
-    return Array.from(this.games.values()).filter(game => 
-      game.title.toLowerCase().includes(lowercaseQuery) ||
-      game.genres?.some(genre => genre.toLowerCase().includes(lowercaseQuery)) ||
-      game.platforms?.some(platform => platform.toLowerCase().includes(lowercaseQuery))
-    );
+    const lowercaseQuery = `%${query.toLowerCase()}%`;
+    return await db
+      .select()
+      .from(games)
+      .where(
+        ilike(games.title, lowercaseQuery)
+      );
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
