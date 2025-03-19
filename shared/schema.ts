@@ -13,6 +13,10 @@ export const games = pgTable("games", {
   rating: integer("rating"),
   summary: text("summary"),
   metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  // New fields
+  playStatus: text("play_status").default("not_started"),
+  personalRating: integer("personal_rating"),
+  review: text("review"),
 });
 
 export const insertGameSchema = createInsertSchema(games).omit({ 
@@ -21,6 +25,9 @@ export const insertGameSchema = createInsertSchema(games).omit({
   title: z.string().min(1, "Title is required"),
   platforms: z.array(z.string()).optional().default([]),
   genres: z.array(z.string()).optional().default([]),
+  playStatus: z.enum(["not_started", "in_progress", "completed", "abandoned"]).optional().default("not_started"),
+  personalRating: z.number().min(0).max(10).optional(),
+  review: z.string().optional(),
 });
 
 export type InsertGame = z.infer<typeof insertGameSchema>;

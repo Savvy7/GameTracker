@@ -6,6 +6,8 @@ export interface IStorage {
   getGames(): Promise<Game[]>;
   getGame(id: number): Promise<Game | undefined>;
   createGame(game: InsertGame): Promise<Game>;
+  updateGame(id: number, game: Partial<InsertGame>): Promise<Game | undefined>;
+  deleteGame(id: number): Promise<boolean>;
   searchGames(query: string): Promise<Game[]>;
 }
 
@@ -22,6 +24,23 @@ export class DatabaseStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
     const [game] = await db.insert(games).values(insertGame).returning();
     return game;
+  }
+
+  async updateGame(id: number, updateGame: Partial<InsertGame>): Promise<Game | undefined> {
+    const [game] = await db
+      .update(games)
+      .set(updateGame)
+      .where(eq(games.id, id))
+      .returning();
+    return game;
+  }
+
+  async deleteGame(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(games)
+      .where(eq(games.id, id))
+      .returning();
+    return !!deleted;
   }
 
   async searchGames(query: string): Promise<Game[]> {

@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/home";
 import AddGame from "@/pages/add-game";
+import GameDetails from "@/pages/game-details";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -11,6 +12,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/add" component={AddGame} />
+      <Route path="/games/:id" component={GameDetails} />
       <Route component={NotFound} />
     </Switch>
   );

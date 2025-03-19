@@ -31,6 +31,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/games/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const game = await storage.getGame(id);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json(game);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch game" });
+    }
+  });
+
   app.get("/api/games/search", async (req, res) => {
     try {
       const query = req.query.q as string;
@@ -55,6 +68,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(game);
     } catch (error) {
       res.status(500).json({ message: "Failed to create game" });
+    }
+  });
+
+  app.patch("/api/games/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const game = await storage.updateGame(id, req.body);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json(game);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update game" });
+    }
+  });
+
+  app.delete("/api/games/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGame(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete game" });
     }
   });
 
