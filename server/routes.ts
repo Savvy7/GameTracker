@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGameSchema } from "@shared/schema";
+import { searchIGDBGames } from "./igdb";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // IGDB API endpoints
@@ -11,11 +12,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!query) {
         return res.status(400).json({ message: "Search query is required" });
       }
-      
-      // TODO: Implement IGDB API search
-      // For now return error since we don't have API key
-      res.status(500).json({ message: "IGDB API key not configured" });
+
+      const games = await searchIGDBGames(query);
+      res.json(games);
     } catch (error) {
+      console.error("IGDB search failed:", error);
       res.status(500).json({ message: "Failed to search IGDB" });
     }
   });
@@ -49,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid game data" });
       }
-      
+
       const game = await storage.createGame(parsed.data);
       res.status(201).json(game);
     } catch (error) {
