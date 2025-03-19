@@ -9,14 +9,14 @@ import { searchGames } from "@/lib/api";
 
 export default function Home() {
   const [search, setSearch] = useState("");
-  
+
   const { data: games = [], isLoading } = useQuery({
     queryKey: ["/api/games", search],
     queryFn: () => search ? searchGames(search) : fetch("/api/games").then(r => r.json())
   });
 
   return (
-    <div className="container py-8">
+    <div className="container px-8 py-8 mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">My Games</h1>
         <Link href="/add">

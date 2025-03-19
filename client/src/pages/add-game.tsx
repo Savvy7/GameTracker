@@ -49,7 +49,7 @@ export default function AddGame() {
   });
 
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container px-8 py-8 mx-auto max-w-2xl">
       <h1 className="text-3xl font-bold mb-8">Add New Game</h1>
 
       <Form {...form}>
