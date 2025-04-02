@@ -11,7 +11,9 @@ let db;
 
 try {
   if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Database functionality will be unavailable.");
+    console.warn("DATABASE_URL is not set. Using in-memory storage.");
+  } else if (process.env.DATABASE_URL.includes("ep-endpoint-disabled")) {
+    console.warn("Database endpoint is disabled. Using in-memory storage.");
   } else {
     // Log connection attempt to diagnose issues
     console.log("Attempting to connect to database...");
