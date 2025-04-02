@@ -3,17 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { ArrowLeft } from "lucide-react";
 import { insertGameSchema, type InsertGame } from "@shared/schema";
 import { createGame, searchIGDB } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -73,94 +63,111 @@ export default function AddGame() {
       genres: game.genres,
       rating: game.rating,
       summary: game.summary,
+      developer: game.developer,
+      publisher: game.publisher,
+      tags: game.tags,
       igdbId: game.igdbId,
     });
     setSearch("");
+    
+    // Auto-submit the form after selecting a game
+    mutation.mutate({
+      title: game.title,
+      cover: game.cover,
+      releaseDate: game.releaseDate,
+      platforms: game.platforms,
+      genres: game.genres,
+      rating: game.rating,
+      summary: game.summary,
+      developer: game.developer,
+      publisher: game.publisher,
+      tags: game.tags || [],
+      igdbId: game.igdbId,
+      playStatus: "not_started",
+      personalRating: 0,
+    });
   };
 
   return (
-    <div className="container px-8 py-8 mx-auto max-w-2xl">
-      <h1 className="text-3xl font-bold mb-8">Add New Game</h1>
-
-      <div className="mb-8">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search for a game..."
-        />
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <div className="h-12 bg-black flex items-center border-b border-gray-800 px-4">
+        <button 
+          onClick={() => navigate("/")}
+          className="flex items-center text-blue-400 hover:text-blue-300"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Back to library
+        </button>
+        <h1 className="text-xl font-semibold mx-auto">Add New Game</h1>
+        <div className="w-[72px]"></div> {/* Spacer to center title */}
+      </div>
+      
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6 max-w-3xl mx-auto w-full">
+        <div className="mb-8 w-full max-w-lg mx-auto">
+          <h2 className="text-lg font-medium mb-4">Search for a game to add to your library</h2>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by game title..."
+          />
+        </div>
 
         {search && (
-          <div className="mt-4 space-y-4">
+          <div className="space-y-2 max-w-lg mx-auto">
             {isSearching ? (
-              <p className="text-muted-foreground">Searching...</p>
+              <div className="p-4 bg-gray-800 rounded-md flex justify-center">
+                <p className="text-gray-400">Searching IGDB...</p>
+              </div>
             ) : searchResults.length > 0 ? (
-              searchResults.map((game: any) => (
-                <Card
-                  key={game.igdbId}
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => selectGame(game)}
-                >
-                  <CardContent className="flex items-center gap-4 p-4">
+              <>
+                <p className="text-sm text-gray-400 mb-2">Select a game to add:</p>
+                {searchResults.map((game: any) => (
+                  <div
+                    key={game.igdbId}
+                    className="p-3 bg-gray-800/60 hover:bg-gray-800 rounded-md cursor-pointer transition-colors flex items-center gap-4"
+                    onClick={() => selectGame(game)}
+                  >
                     {game.cover ? (
                       <img
                         src={game.cover}
                         alt={game.title}
-                        className="w-16 h-20 object-cover rounded"
+                        className="w-12 h-16 object-cover rounded-sm"
                       />
                     ) : (
-                      <div className="w-16 h-20 bg-muted rounded flex items-center justify-center">
-                        <span className="text-muted-foreground text-sm">No Cover</span>
+                      <div className="w-12 h-16 bg-gray-700 rounded-sm flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No Cover</span>
                       </div>
                     )}
                     <div>
-                      <h3 className="font-semibold">{game.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {game.releaseDate}
-                      </p>
+                      <h3 className="font-medium">{game.title}</h3>
+                      <div className="flex gap-4 text-sm text-gray-400">
+                        {game.releaseDate && <span>{game.releaseDate.split('-')[0]}</span>}
+                        {game.platforms && game.platforms.length > 0 && (
+                          <span className="truncate max-w-[200px]">{game.platforms.join(', ')}</span>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  </div>
+                ))}
+              </>
             ) : (
-              <p className="text-muted-foreground">No games found</p>
+              <div className="p-4 bg-gray-800 rounded-md flex justify-center">
+                <p className="text-gray-400">No games found. Try another search term.</p>
+              </div>
             )}
           </div>
         )}
-      </div>
-
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-          className="space-y-6"
-        >
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/")}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Adding..." : "Add Game"}
-            </Button>
+        
+        {mutation.isPending && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
+              <p className="text-white">Adding game to your library...</p>
+            </div>
           </div>
-        </form>
-      </Form>
+        )}
+      </div>
     </div>
   );
 }

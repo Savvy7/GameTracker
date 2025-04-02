@@ -27,6 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const games = await storage.getGames();
       res.json(games);
     } catch (error) {
+      console.error("Error fetching games:", error);
       res.status(500).json({ message: "Failed to fetch games" });
     }
   });

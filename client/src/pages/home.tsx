@@ -1,43 +1,38 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "wouter";
 import { Plus } from "lucide-react";
-import { SearchBar } from "@/components/search-bar";
-import { GameGrid } from "@/components/game-grid";
+import { GameList } from "@/components/game-list";
 import { searchGames } from "@/lib/api";
 
-export default function Home() {
-  const [search, setSearch] = useState("");
+interface HomeProps {
+  search?: string;
+}
+
+export default function Home({ search = "" }: HomeProps) {
+  const [, navigate] = useLocation();
 
   const { data: games = [], isLoading } = useQuery({
     queryKey: ["/api/games", search],
     queryFn: () => search ? searchGames(search) : fetch("/api/games").then(r => r.json())
   });
 
+  // Add floating action button for adding new games
   return (
-    <div className="container px-8 py-8 mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">My Games</h1>
-        <Link href="/add">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Game
-          </Button>
-        </Link>
-      </div>
-
-      <div className="max-w-md mb-8">
-        <SearchBar 
-          value={search}
-          onChange={setSearch}
+    <div className="relative h-full">
+      <div className="p-4">
+        <GameList 
+          games={games}
+          isLoading={isLoading}
         />
       </div>
 
-      <GameGrid 
-        games={games}
-        isLoading={isLoading}
-      />
+      {/* Floating action button */}
+      <Link href="/add">
+        <button className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors">
+          <Plus className="h-6 w-6" />
+        </button>
+      </Link>
     </div>
   );
 }
