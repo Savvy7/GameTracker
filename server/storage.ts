@@ -35,7 +35,7 @@ export interface IStorage {
   searchGames(query: string, userId?: number, filters?: GameFilters): Promise<Game[]>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any type to avoid SessionStore type issues
 }
 
 export interface GameFilters {
@@ -56,7 +56,7 @@ export class MemStorage implements IStorage {
   private friendships: Friendship[] = [];
   private nextUserId = 1;
   private nextGameId = 1;
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any type to avoid SessionStore type issues
 
   constructor() {
     this.sessionStore = new MemoryStore({
@@ -291,7 +291,7 @@ export class MemStorage implements IStorage {
 export class DatabaseStorage implements IStorage {
   private memStorage = new MemStorage();
   private useMemStorage = false;
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any type to avoid SessionStore type issues
 
   constructor() {
     // Test database connection on init

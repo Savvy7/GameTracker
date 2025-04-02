@@ -39,7 +39,7 @@ export function setupAuth(app: Express): void {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
-    store: storage.sessionStore,
+    store: storage.sessionStore, // This will be automatically set to memory store if DB is unavailable
   };
 
   app.set("trust proxy", 1);
@@ -56,7 +56,7 @@ export function setupAuth(app: Express): void {
           return done(null, false, { message: "Incorrect username or password" });
         }
         
-        const passwordValid = await comparePasswords(password, user.password);
+        const passwordValid = await comparePasswords(password, user.passwordHash);
         if (!passwordValid) {
           return done(null, false, { message: "Incorrect username or password" });
         }
@@ -205,14 +205,14 @@ export function setupAuth(app: Express): void {
       }
       
       // Verify current password
-      const isPasswordValid = await comparePasswords(currentPassword, user.password);
+      const isPasswordValid = await comparePasswords(currentPassword, user.passwordHash);
       if (!isPasswordValid) {
         return res.status(400).json({ message: "Current password is incorrect" });
       }
       
       // Hash and update new password
       const passwordHash = await hashPassword(newPassword);
-      await storage.updateUser(userId, { password: passwordHash });
+      await storage.updateUser(userId, { passwordHash });
       
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
