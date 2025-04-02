@@ -1,33 +1,26 @@
 import { Link, useLocation } from "wouter";
 import { 
   Home, 
+  Search, 
   Play, 
   Download, 
   Clock, 
   Heart, 
+  Settings, 
   CheckSquare, 
   AlertCircle,
-  BarChart2,
-  Users,
-  User,
-  LogIn,
-  LogOut,
-  PlusCircle
+  BarChart2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   className?: string;
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [location, navigate] = useLocation();
-  const { user, logoutMutation } = useAuth();
-  const isLoggedIn = !!user;
+  const [location] = useLocation();
 
-  const libraryItems = [
+  const navigationItems = [
     { href: "/", icon: Home, label: "Library" },
     { href: "/recent", icon: Clock, label: "Recently Played" },
     { href: "/installed", icon: Download, label: "Installed" },
@@ -38,35 +31,13 @@ export function Sidebar({ className }: SidebarProps) {
     { href: "/stats", icon: BarChart2, label: "Statistics" },
   ];
 
-  const accountItems = isLoggedIn 
-    ? [
-        { href: "/profile", icon: User, label: "Profile" },
-        { href: "/friends", icon: Users, label: "Friends" },
-      ]
-    : [
-        { href: "/auth", icon: LogIn, label: "Login / Register" },
-      ];
-  
-  // Handle logout
-  const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        // Redirect to home after logout
-        navigate("/");
-      }
-    });
-  };
-
   return (
-    <div className={cn("bg-black text-white overflow-y-auto p-2 flex flex-col", className)}>
-      <div className="py-4 flex-1">
+    <div className={cn("bg-black text-white overflow-y-auto p-2", className)}>
+      <div className="py-4">
         <h2 className="text-lg font-semibold px-3 mb-3 text-gray-200">Playnite</h2>
         
-        <div className="text-xs uppercase font-semibold tracking-wider text-gray-500 mt-4 mb-2 px-3">
-          Library
-        </div>
         <nav className="space-y-1">
-          {libraryItems.map((item) => (
+          {navigationItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <div className={cn(
                 "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer",
@@ -79,44 +50,46 @@ export function Sidebar({ className }: SidebarProps) {
           ))}
         </nav>
         
-        <div className="text-xs uppercase font-semibold tracking-wider text-gray-500 mt-6 mb-2 px-3">
-          Account
-        </div>
-        <nav className="space-y-1">
-          {accountItems.map((item) => (
-            <Link key={item.href} href={item.href}>
+        <div className="mt-6 px-3">
+          <div className="text-xs uppercase font-semibold tracking-wider text-gray-500 mb-2">
+            Platforms
+          </div>
+          <nav className="space-y-1">
+            <Link href="/platform/pc">
               <div className={cn(
                 "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer",
-                location === item.href ? "bg-gray-800 text-blue-400" : "text-gray-400"
+                location === "/platform/pc" ? "bg-gray-800 text-blue-400" : "text-gray-400"
               )}>
-                <item.icon className="mr-3 h-4 w-4" />
-                {item.label}
+                PC
               </div>
             </Link>
-          ))}
-          
-          {isLoggedIn && (
-            <div 
-              className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer text-gray-400"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-3 h-4 w-4" />
-              Logout
-            </div>
-          )}
-        </nav>
-      </div>
-      
-      {isLoggedIn && (
-        <div className="p-3 pt-0">
-          <Link href="/add">
-            <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Game
-            </Button>
-          </Link>
+            <Link href="/platform/playstation">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer",
+                location === "/platform/playstation" ? "bg-gray-800 text-blue-400" : "text-gray-400"
+              )}>
+                PlayStation
+              </div>
+            </Link>
+            <Link href="/platform/xbox">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer",
+                location === "/platform/xbox" ? "bg-gray-800 text-blue-400" : "text-gray-400"
+              )}>
+                Xbox
+              </div>
+            </Link>
+            <Link href="/platform/nintendo">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer",
+                location === "/platform/nintendo" ? "bg-gray-800 text-blue-400" : "text-gray-400"
+              )}>
+                Nintendo
+              </div>
+            </Link>
+          </nav>
         </div>
-      )}
+      </div>
     </div>
   );
 }
