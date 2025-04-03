@@ -1,28 +1,28 @@
-import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { mysqlTable, text, int, json } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const games = pgTable("games", {
-  id: serial("id").primaryKey(),
+export const games = mysqlTable("games", {
+  id: int("id").primaryKey().autoincrement(),
   title: text("title").notNull(),
-  igdbId: integer("igdb_id"),
+  igdbId: int("igdb_id"),
   cover: text("cover"),
   releaseDate: text("release_date"),
-  platforms: text("platforms").array(),
-  genres: text("genres").array(),
-  rating: integer("rating"),
+  platforms: json("platforms").$type<string[]>(),
+  genres: json("genres").$type<string[]>(),
+  rating: int("rating"),
   summary: text("summary"),
-  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
   // New fields
   playStatus: text("play_status").default("not_started"),
-  personalRating: integer("personal_rating"),
+  personalRating: int("personal_rating"),
   review: text("review"),
   // Additional metadata
   developer: text("developer"),
   publisher: text("publisher"),
   installSize: text("install_size"),
   timeToComplete: text("time_to_complete"),
-  tags: text("tags").array(),
+  tags: json("tags").$type<string[]>(),
 });
 
 export const insertGameSchema = createInsertSchema(games).omit({ 

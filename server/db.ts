@@ -1,10 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import * as mysql from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
 import * as schema from "@shared/schema";
-
-// Configure Neon to use WebSockets
-neonConfig.webSocketConstructor = ws;
 
 let pool;
 let db;
@@ -17,14 +13,10 @@ try {
     console.log("Attempting to connect to database...");
 
     // Create the connection pool
-    pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      max: 5, // Reduced pool size to avoid connection issues
-      idleTimeoutMillis: 30000 // Increased timeout
-    });
+    pool = mysql.createPool(process.env.DATABASE_URL);
 
     // Initialize db
-    db = drizzle({ client: pool, schema });
+    db = drizzle(pool);
   }
 } catch (error) {
   console.error("Failed to initialize database:", error);

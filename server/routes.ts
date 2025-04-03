@@ -9,8 +9,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/igdb/search", async (req, res) => {
     try {
       const query = req.query.q as string;
+      
       if (!query) {
-        return res.status(400).json({ message: "Search query is required" });
+        return res.status(400).json({ message: "Query parameter 'q' is required" });
+      }
+
+      // Check if IGDB credentials are configured
+      if (!process.env.IGDB_CLIENT_ID || !process.env.IGDB_CLIENT_SECRET) {
+        console.warn("IGDB credentials not configured, using mock data");
+        // Return mock data for testing
+        return res.json([
+          {
+            igdbId: 1,
+            title: "Mock Game 1",
+            cover: null,
+            releaseDate: "2023-01-01",
+            platforms: ["PC", "PlayStation 5"],
+            genres: ["Action", "Adventure"],
+            rating: 85,
+            summary: "This is a mock game for testing",
+            developer: "Mock Developer",
+            publisher: "Mock Publisher",
+            tags: ["Single Player"],
+          },
+          {
+            igdbId: 2,
+            title: "Mock Game 2",
+            cover: null,
+            releaseDate: "2023-02-01",
+            platforms: ["Xbox Series X", "PC"],
+            genres: ["RPG"],
+            rating: 90,
+            summary: "Another mock game for testing",
+            developer: "Mock Developer 2",
+            publisher: "Mock Publisher 2",
+            tags: ["Multiplayer"],
+          }
+        ]);
       }
 
       const games = await searchIGDBGames(query);
